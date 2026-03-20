@@ -3,7 +3,7 @@ export default function LocalBusinessSchema() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: "Prashanthi Digital Studio & LED Walls",
-    image: "https://placehold.co/1200x630/c8102e/ffffff?text=Prashanthi+Studio",
+    image: "https://prashanthidigitals.com/images/logo/logo.jpeg",
     "@id": "https://prashanthidigitals.com",
     url: "https://prashanthidigitals.com",
     telephone: "+91-9948670396",

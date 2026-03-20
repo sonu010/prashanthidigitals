@@ -14,47 +14,47 @@ const photographyServices = [
   {
     title: "Wedding Photography",
     desc: "Full-day or multi-day coverage of wedding functions including candid and traditional styles.",
-    image: "https://placehold.co/400x300/c8102e/ffffff?text=Wedding+400x300",
+    image: "/images/gallery/wedding/cp100199.jpg",
   },
   {
     title: "Pre-Wedding Shoot",
     desc: "Couple photoshoots at stunning outdoor/indoor locations before the wedding day.",
-    image: "https://placehold.co/400x300/1a1a2e/ffffff?text=Pre-Wedding+400x300",
+    image: "/images/gallery/prewedding/cp101404.jpg",
   },
   {
     title: "Engagement Photography",
     desc: "Coverage of ring ceremony and engagement events with candid and posed shots.",
-    image: "https://placehold.co/400x300/c8102e/ffffff?text=Engagement+400x300",
+    image: "/images/gallery/wedding/cp109196.jpg",
   },
   {
     title: "Birthday Photography",
     desc: "Kids and adults birthday events — from cake smash to milestone celebrations.",
-    image: "https://placehold.co/400x300/1a1a2e/ffffff?text=Birthday+400x300",
+    image: "/images/gallery/baby-birthday/056a5957.jpg",
   },
   {
     title: "Maternity Shoot",
     desc: "Beautiful maternity photography for expecting mothers in studio or outdoor settings.",
-    image: "https://placehold.co/400x300/c8102e/ffffff?text=Maternity+400x300",
+    image: "/images/gallery/prewedding/cp101553.jpg",
   },
   {
     title: "Baby / Newborn Photography",
     desc: "Studio or home-based shoots for newborns and infants with adorable setups.",
-    image: "https://placehold.co/400x300/1a1a2e/ffffff?text=Newborn+400x300",
+    image: "/images/gallery/cradle-ceremony/dsc06501.jpg",
   },
   {
     title: "Religious Ceremonies",
     desc: "Upanayanam, Naming Ceremony, Griha Pravesh, Seemantham & temple events.",
-    image: "https://placehold.co/400x300/c8102e/ffffff?text=Religious+400x300",
+    image: "/images/gallery/mangala-snanam/056a8555.jpg",
   },
   {
     title: "Corporate Event Photography",
     desc: "Professional coverage for conferences, seminars, product launches & corporate parties.",
-    image: "https://placehold.co/400x300/1a1a2e/ffffff?text=Corporate+400x300",
+    image: "/images/gallery/reception/reception-1.jpg",
   },
   {
     title: "Fashion & Portfolio Shoots",
     desc: "Individual or group fashion photography sessions for models and professionals.",
-    image: "https://placehold.co/400x300/c8102e/ffffff?text=Fashion+400x300",
+    image: "/images/gallery/haldi/dsc00032.jpg",
   },
 ];
 

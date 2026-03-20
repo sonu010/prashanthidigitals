@@ -44,7 +44,7 @@ export default function AboutPage() {
             <div className="flex justify-center">
               <div className="relative">
                 <Image
-                  src="https://placehold.co/500x600/c8102e/ffffff?text=Dad+Photo+500x600"
+                  src="/images/owner/dad.jpg"
                   alt="Lead Photographer - Prashanthi Digital Studio"
                   width={500}
                   height={600}
@@ -166,11 +166,15 @@ export default function AboutPage() {
             <p className="text-gray-500">Visit us at Nacharam, Hyderabad</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
+            {[
+              { src: "/images/gallery/wedding/cp108787.jpg", alt: "Wedding photography at Prashanthi Studio" },
+              { src: "/images/gallery/reception/reception-50.jpg", alt: "Reception event coverage" },
+              { src: "/images/gallery/prewedding/cp101427.jpg", alt: "Pre-wedding shoot" },
+            ].map((photo, i) => (
               <div key={i} className="aspect-[4/3] relative rounded-xl overflow-hidden">
                 <Image
-                  src={`https://placehold.co/600x450/1a1a2e/ffffff?text=Studio+Photo+${i}`}
-                  alt={`Studio photo ${i}`}
+                  src={photo.src}
+                  alt={photo.alt}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 50vw, 33vw"

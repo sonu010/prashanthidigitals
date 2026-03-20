@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAdminAuth } from "@/context/AdminAuth";
 import {
   FiGrid,
   FiCalendar,
@@ -26,6 +27,7 @@ const navItems = [
 export default function AdminSidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const { logout } = useAdminAuth();
 
   return (
     <>
@@ -95,6 +97,13 @@ export default function AdminSidebar() {
             <FiLogOut className="w-5 h-5" />
             Back to Website
           </Link>
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm hover:bg-red-500/20 transition text-red-300 w-full text-left"
+          >
+            <FiLogOut className="w-5 h-5" />
+            Logout
+          </button>
         </nav>
       </aside>
 

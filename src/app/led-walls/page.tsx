@@ -75,7 +75,7 @@ export default function LEDWallPage() {
             </div>
             <div className="flex justify-center">
               <Image
-                src="https://placehold.co/600x400/f5c518/1a1a2e?text=LED+Wall+Hero+600x400"
+                src="/images/led-walls/ledwalls.jpg"
                 alt="LED Wall at event"
                 width={600}
                 height={400}
@@ -152,14 +152,21 @@ export default function LEDWallPage() {
             <p className="text-gray-500">Photos from our past events</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[
+              { src: "/images/led-walls/ledwalls.jpg", alt: "LED Wall Setup" },
+              { src: "/images/gallery/wedding/cp100199.jpg", alt: "LED Wall at Wedding" },
+              { src: "/images/gallery/reception/reception-1.jpg", alt: "LED Wall at Reception" },
+              { src: "/images/gallery/reception/reception-50.jpg", alt: "Event LED Display" },
+              { src: "/images/gallery/wedding/cp108812.jpg", alt: "Stage LED Wall" },
+              { src: "/images/gallery/reception/reception-75.jpg", alt: "LED Wall Event" },
+            ].map((photo, i) => (
               <div
                 key={i}
                 className="aspect-[4/3] relative rounded-xl overflow-hidden group"
               >
                 <Image
-                  src={`https://placehold.co/600x450/1a1a2e/f5c518?text=LED+Event+${i}`}
-                  alt={`LED Wall event ${i}`}
+                  src={photo.src}
+                  alt={photo.alt}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                   sizes="(max-width: 768px) 50vw, 33vw"

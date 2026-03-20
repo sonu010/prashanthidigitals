@@ -1,9 +1,22 @@
-import type { Metadata } from "next";
+"use client";
 import AdminSidebar from "@/components/AdminSidebar";
+import AdminLoginForm from "@/components/AdminLoginForm";
+import { AdminAuthProvider, useAdminAuth } from "@/context/AdminAuth";
 
-export const metadata: Metadata = {
-  title: "Admin | Prashanthi Digital Studio",
-};
+function AdminContent({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAdminAuth();
+
+  if (!isAuthenticated) {
+    return <AdminLoginForm />;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+      <AdminSidebar />
+      <main className="flex-1 min-w-0">{children}</main>
+    </div>
+  );
+}
 
 export default function AdminLayout({
   children,
@@ -11,9 +24,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
-      <AdminSidebar />
-      <main className="flex-1 min-w-0">{children}</main>
-    </div>
+    <AdminAuthProvider>
+      <AdminContent>{children}</AdminContent>
+    </AdminAuthProvider>
   );
 }

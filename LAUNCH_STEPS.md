@@ -157,12 +157,12 @@ On the configuration page:
 |---------|-------|
 | **Project Name** | `prashanthi-studio` (or any name you like) |
 | **Framework Preset** | Next.js (auto-detected) |
-| **Root Directory** | Click **Edit** → type `website` → click **Continue** |
+| **Root Directory** | Leave as `./` (default — do NOT change) |
 | **Build Command** | Leave default (`next build`) |
 | **Output Directory** | Leave default |
 | **Install Command** | Leave default (`npm install`) |
 
-> ⚠️ **IMPORTANT:** You MUST set Root Directory to `website` because the Next.js project is inside the `website/` folder, not the repo root.
+> ℹ️ **Note:** The Git repo root already contains the Next.js project files directly, so no root directory change is needed.
 
 ### 3.4 Add Environment Variables
 
@@ -250,18 +250,18 @@ Vercel will show records like:
 
 | Type | Name | Value |
 |------|------|-------|
-| A | @ | `76.76.21.21` |
+| A | @ | `216.198.79.1` |
 | CNAME | www | `cname.vercel-dns.com` |
 
-1. Log in to your domain registrar (where you bought `prashanthidigitals.com`)
-2. Go to **DNS Settings** / **DNS Management** / **DNS Records**
+1. Log in to **[Hostinger](https://hpanel.hostinger.com/)** (where you bought `prashanthidigitals.com`)
+2. Go to **Domains** → Click `prashanthidigitals.com` → **DNS / Nameservers** or **DNS Zone**
 3. **Delete any existing A records** pointing to a different IP
 4. Add the records exactly as Vercel shows:
-   - **A Record:** Name = `@`, Value = `76.76.21.21`
+   - **A Record:** Name = `@`, Value = `216.198.79.1`
    - **CNAME Record:** Name = `www`, Value = `cname.vercel-dns.com`
 5. Save the changes
 6. Wait 5-30 minutes for DNS propagation
-7. Go back to Vercel Domains page → it should show **✓ Valid Configuration**
+7. Go back to Vercel Domains page → click **Refresh** → it should show **✓ Valid Configuration**
 
 ### 5.3 Alternative: Use Vercel Nameservers (Easier)
 

@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import WhatsAppFloat from "@/components/WhatsAppFloat";
-import QuickEnquiry from "@/components/QuickEnquiry";
+import LayoutShell from "@/components/LayoutShell";
 import LocalBusinessSchema from "@/components/LocalBusinessSchema";
 
 const geistSans = Geist({
@@ -48,11 +45,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <LocalBusinessSchema />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <WhatsAppFloat />
-        <QuickEnquiry />
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );
