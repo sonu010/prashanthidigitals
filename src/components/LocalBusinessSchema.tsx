@@ -4,8 +4,8 @@ export default function LocalBusinessSchema() {
     "@type": "LocalBusiness",
     name: "Prashanthi Digital Studio & LED Walls",
     image: "https://placehold.co/1200x630/c8102e/ffffff?text=Prashanthi+Studio",
-    "@id": "https://prashanthistudio.com",
-    url: "https://prashanthistudio.com",
+    "@id": "https://prashanthidigitals.com",
+    url: "https://prashanthidigitals.com",
     telephone: "+91-9948670396",
     email: "prashanthistudio@gmail.com",
     address: {

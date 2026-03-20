@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://prashanthistudio.com";
+  const baseUrl = "https://prashanthidigitals.com";
   const lastModified = new Date();
 
   return [
