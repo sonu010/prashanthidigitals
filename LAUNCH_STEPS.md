@@ -232,63 +232,52 @@ Vercel will auto-deploy in ~1 minute.
 
 ---
 
-## Step 5: Connect a Custom Domain (Optional but Recommended)
+## Step 5: Connect `prashanthidigitals.com` to Vercel
 
-### 5.1 Buy a Domain
+You already own the domain! Now connect it.
 
-Recommended domains (pick one):
-- `prashanthistudio.in` — ₹500-700/year
-- `prashanthistudio.com` — ₹800-1000/year
-- `prashanthidigital.in` — ₹500-700/year
-
-Where to buy:
-- [GoDaddy.com](https://www.godaddy.com/en-in) — popular in India
-- [Namecheap.com](https://www.namecheap.com) — cheapest
-- [Hostinger.in](https://www.hostinger.in) — budget option
-
-### 5.2 Add Domain to Vercel
+### 5.1 Add Domain in Vercel
 
 1. Go to [Vercel Dashboard](https://vercel.com/dashboard) → Click your project
 2. Go to **Settings** → **Domains**
-3. Type your domain (e.g., `prashanthistudio.in`) → Click **Add**
-4. Vercel will show you DNS records to configure
+3. Type `prashanthidigitals.com` → Click **Add**
+4. Also add `www.prashanthidigitals.com` → Click **Add**
+5. Vercel will show you the DNS records you need to configure
 
-### 5.3 Update DNS at Your Domain Registrar
+### 5.2 Update DNS at Your Domain Registrar
 
-Vercel will show something like:
+Vercel will show records like:
 
 | Type | Name | Value |
 |------|------|-------|
 | A | @ | `76.76.21.21` |
 | CNAME | www | `cname.vercel-dns.com` |
 
-1. Log in to your domain registrar (GoDaddy/Namecheap)
-2. Go to **DNS Settings** / **DNS Management**
-3. Add the records exactly as Vercel shows
-4. Wait 5-30 minutes for DNS to propagate
-5. Go back to Vercel → the domain should show **✓ Valid**
+1. Log in to your domain registrar (where you bought `prashanthidigitals.com`)
+2. Go to **DNS Settings** / **DNS Management** / **DNS Records**
+3. **Delete any existing A records** pointing to a different IP
+4. Add the records exactly as Vercel shows:
+   - **A Record:** Name = `@`, Value = `76.76.21.21`
+   - **CNAME Record:** Name = `www`, Value = `cname.vercel-dns.com`
+5. Save the changes
+6. Wait 5-30 minutes for DNS propagation
+7. Go back to Vercel Domains page → it should show **✓ Valid Configuration**
 
-> SSL (HTTPS) is automatic and free with Vercel.
+### 5.3 Alternative: Use Vercel Nameservers (Easier)
 
-### 5.4 Update Sitemap Base URL
+If your registrar supports custom nameservers, this is even simpler:
 
-Once you have a domain, update the sitemap:
+1. In Vercel Domains, look for **"Nameservers"** option
+2. Vercel will give you nameservers like:
+   ```
+   ns1.vercel-dns.com
+   ns2.vercel-dns.com
+   ```
+3. Go to your domain registrar → **Nameservers** section
+4. Change nameservers from default to the Vercel ones
+5. Wait up to 48 hours (usually 1-2 hours)
 
-Edit `website/src/app/sitemap.ts` — change the `baseUrl`:
-
-```ts
-// Change from:
-const baseUrl = "https://prashanthistudio.com";
-// Change to:
-const baseUrl = "https://prashanthistudio.in";  // your actual domain
-```
-
-Push the change:
-```bash
-git add src/app/sitemap.ts
-git commit -m "Update sitemap with real domain"
-git push origin main
-```
+> ✅ SSL (HTTPS) is automatic and free with Vercel. No extra setup needed.
 
 ---
 
