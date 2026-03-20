@@ -36,6 +36,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Photos are hosted on Cloudinary - exclude from Git
+/public/images/gallery/
+/public/images/hero/
+/public/images/led-walls/
+/public/images/owner/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
