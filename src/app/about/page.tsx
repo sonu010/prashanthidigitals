@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FiCamera, FiAward, FiUsers, FiHeart, FiArrowRight } from "react-icons/fi";
 import type { Metadata } from "next";
 import FadeInOnScroll from "@/components/FadeInOnScroll";
+import { cloudinaryUrl, siteImages } from "@/lib/cloudinary";
 
 export const metadata: Metadata = {
   title: "About Us | Prashanthi Digital Studio",
@@ -44,7 +45,7 @@ export default function AboutPage() {
             <div className="flex justify-center">
               <div className="relative">
                 <Image
-                  src="/images/owner/dad.jpg"
+                  src={cloudinaryUrl(siteImages.owner, 500)}
                   alt="Lead Photographer - Prashanthi Digital Studio"
                   width={500}
                   height={600}
@@ -167,9 +168,9 @@ export default function AboutPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { src: "/images/gallery/wedding/cp108787.jpg", alt: "Wedding photography at Prashanthi Studio" },
-              { src: "/images/gallery/reception/reception-50.jpg", alt: "Reception event coverage" },
-              { src: "/images/gallery/prewedding/cp101427.jpg", alt: "Pre-wedding shoot" },
+              { src: cloudinaryUrl("prashanthi/gallery/wedding/cp108787", 600), alt: "Wedding photography at Prashanthi Studio" },
+              { src: cloudinaryUrl("prashanthi/gallery/reception/reception-50", 600), alt: "Reception event coverage" },
+              { src: cloudinaryUrl("prashanthi/gallery/prewedding/cp101427", 600), alt: "Pre-wedding shoot" },
             ].map((photo, i) => (
               <div key={i} className="aspect-[4/3] relative rounded-xl overflow-hidden">
                 <Image

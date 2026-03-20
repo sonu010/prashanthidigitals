@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FiArrowRight } from "react-icons/fi";
 import type { Metadata } from "next";
 import FadeInOnScroll from "@/components/FadeInOnScroll";
+import { cloudinaryUrl } from "@/lib/cloudinary";
 
 export const metadata: Metadata = {
   title: "Services | Prashanthi Digital Studio",
@@ -14,47 +15,47 @@ const photographyServices = [
   {
     title: "Wedding Photography",
     desc: "Full-day or multi-day coverage of wedding functions including candid and traditional styles.",
-    image: "/images/gallery/wedding/cp100199.jpg",
+    image: cloudinaryUrl("prashanthi/gallery/wedding/cp100199", 400),
   },
   {
     title: "Pre-Wedding Shoot",
     desc: "Couple photoshoots at stunning outdoor/indoor locations before the wedding day.",
-    image: "/images/gallery/prewedding/cp101404.jpg",
+    image: cloudinaryUrl("prashanthi/gallery/prewedding/cp101404", 400),
   },
   {
     title: "Engagement Photography",
     desc: "Coverage of ring ceremony and engagement events with candid and posed shots.",
-    image: "/images/gallery/wedding/cp109196.jpg",
+    image: cloudinaryUrl("prashanthi/gallery/wedding/cp109196", 400),
   },
   {
     title: "Birthday Photography",
     desc: "Kids and adults birthday events — from cake smash to milestone celebrations.",
-    image: "/images/gallery/baby-birthday/056a5957.jpg",
+    image: cloudinaryUrl("prashanthi/gallery/baby-birthday/056a5957", 400),
   },
   {
     title: "Maternity Shoot",
     desc: "Beautiful maternity photography for expecting mothers in studio or outdoor settings.",
-    image: "/images/gallery/prewedding/cp101553.jpg",
+    image: cloudinaryUrl("prashanthi/gallery/prewedding/cp101553", 400),
   },
   {
     title: "Baby / Newborn Photography",
     desc: "Studio or home-based shoots for newborns and infants with adorable setups.",
-    image: "/images/gallery/cradle-ceremony/dsc06501.jpg",
+    image: cloudinaryUrl("prashanthi/gallery/cradle-ceremony/dsc06501", 400),
   },
   {
     title: "Religious Ceremonies",
     desc: "Upanayanam, Naming Ceremony, Griha Pravesh, Seemantham & temple events.",
-    image: "/images/gallery/mangala-snanam/056a8555.jpg",
+    image: cloudinaryUrl("prashanthi/gallery/mangala-snanam/056a8555", 400),
   },
   {
     title: "Corporate Event Photography",
     desc: "Professional coverage for conferences, seminars, product launches & corporate parties.",
-    image: "/images/gallery/reception/reception-1.jpg",
+    image: cloudinaryUrl("prashanthi/gallery/reception/reception-1", 400),
   },
   {
     title: "Fashion & Portfolio Shoots",
     desc: "Individual or group fashion photography sessions for models and professionals.",
-    image: "/images/gallery/haldi/dsc00032.jpg",
+    image: cloudinaryUrl("prashanthi/gallery/haldi/dsc00032", 400),
   },
 ];
 

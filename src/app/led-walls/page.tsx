@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FiArrowRight, FiCheck } from "react-icons/fi";
 import type { Metadata } from "next";
 import FadeInOnScroll from "@/components/FadeInOnScroll";
+import { cloudinaryUrl, siteImages } from "@/lib/cloudinary";
 
 export const metadata: Metadata = {
   title: "LED Wall Rental | Prashanthi Digital Studio",
@@ -75,7 +76,7 @@ export default function LEDWallPage() {
             </div>
             <div className="flex justify-center">
               <Image
-                src="/images/led-walls/ledwalls.jpg"
+                src={cloudinaryUrl(siteImages.ledWall, 600)}
                 alt="LED Wall at event"
                 width={600}
                 height={400}
@@ -153,12 +154,12 @@ export default function LEDWallPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { src: "/images/led-walls/ledwalls.jpg", alt: "LED Wall Setup" },
-              { src: "/images/gallery/wedding/cp100199.jpg", alt: "LED Wall at Wedding" },
-              { src: "/images/gallery/reception/reception-1.jpg", alt: "LED Wall at Reception" },
-              { src: "/images/gallery/reception/reception-50.jpg", alt: "Event LED Display" },
-              { src: "/images/gallery/wedding/cp108812.jpg", alt: "Stage LED Wall" },
-              { src: "/images/gallery/reception/reception-75.jpg", alt: "LED Wall Event" },
+              { src: cloudinaryUrl("prashanthi/led-walls/ledwalls", 600), alt: "LED Wall Setup" },
+              { src: cloudinaryUrl("prashanthi/gallery/wedding/cp100199", 600), alt: "LED Wall at Wedding" },
+              { src: cloudinaryUrl("prashanthi/gallery/reception/reception-1", 600), alt: "LED Wall at Reception" },
+              { src: cloudinaryUrl("prashanthi/gallery/reception/reception-50", 600), alt: "Event LED Display" },
+              { src: cloudinaryUrl("prashanthi/gallery/wedding/cp108812", 600), alt: "Stage LED Wall" },
+              { src: cloudinaryUrl("prashanthi/gallery/reception/reception-75", 600), alt: "LED Wall Event" },
             ].map((photo, i) => (
               <div
                 key={i}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { FiCamera, FiFilm, FiMonitor, FiStar, FiArrowRight, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import FadeInOnScroll from "@/components/FadeInOnScroll";
+import { cloudinaryUrl, siteImages, defaultGalleryPhotos } from "@/lib/cloudinary";
 
 const services = [
   {
@@ -115,7 +116,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative bg-[var(--accent)] min-h-[70vh] md:min-h-[80vh] flex items-center">
         <div className="absolute inset-0 bg-gradient-to-r from-[#1a1a2e] via-[#1a1a2e]/95 to-[#1a1a2e]/70" />
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "url('/images/hero/main-photo.jpg')", backgroundSize: "cover", backgroundPosition: "center" }} />
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url('${cloudinaryUrl(siteImages.hero, 1920)}')`, backgroundSize: "cover", backgroundPosition: "center" }} />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-32 w-full">
           <div className="max-w-2xl">
             <p className="text-[var(--gold)] font-semibold text-sm md:text-base tracking-wider uppercase mb-3">
@@ -150,7 +151,7 @@ export default function HomePage() {
             <FadeInOnScroll direction="left">
               <div className="flex justify-center">
                 <div className="relative">
-                  <Image src="/images/owner/dad.jpg" alt="Prashanthi Studio - Lead Photographer" width={500} height={600} className="rounded-2xl shadow-2xl object-cover w-full max-w-sm md:max-w-md" />
+                  <Image src={cloudinaryUrl(siteImages.owner, 500)} alt="Prashanthi Studio - Lead Photographer" width={500} height={600} className="rounded-2xl shadow-2xl object-cover w-full max-w-sm md:max-w-md" />
                   <div className="absolute -bottom-4 -right-4 bg-[var(--primary)] text-white py-3 px-6 rounded-xl shadow-lg">
                     <span className="text-2xl font-bold">20+</span>
                     <span className="block text-xs">Years Experience</span>
@@ -229,17 +230,10 @@ export default function HomePage() {
             </div>
           </FadeInOnScroll>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-            {[
-              { src: "/images/gallery/wedding/cp100199.jpg", alt: "Wedding Photography" },
-              { src: "/images/gallery/prewedding/cp101404.jpg", alt: "Pre-Wedding Shoot" },
-              { src: "/images/gallery/reception/reception-1.jpg", alt: "Reception Photography" },
-              { src: "/images/gallery/haldi/dsc00032.jpg", alt: "Haldi Ceremony" },
-              { src: "/images/gallery/baby-birthday/056a5957.jpg", alt: "Birthday Celebration" },
-              { src: "/images/gallery/cradle-ceremony/dsc06501.jpg", alt: "Cradle Ceremony" },
-            ].map((photo, i) => (
-              <FadeInOnScroll key={i} delay={i * 100}>
+            {defaultGalleryPhotos.slice(0, 6).map((photo, i) => (
+              <FadeInOnScroll key={photo.id} delay={i * 100}>
                 <div className="relative aspect-[4/3] rounded-lg overflow-hidden group cursor-pointer">
-                  <Image src={photo.src} alt={photo.alt} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={cloudinaryUrl(photo.publicId, 600)} alt={photo.title} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all" />
                 </div>
               </FadeInOnScroll>
@@ -279,7 +273,7 @@ export default function HomePage() {
             </FadeInOnScroll>
             <FadeInOnScroll direction="right">
               <div className="flex justify-center">
-                <Image src="/images/led-walls/ledwalls.jpg" alt="LED Wall at event" width={600} height={400} className="rounded-xl shadow-2xl w-full max-w-lg" />
+                <Image src={cloudinaryUrl(siteImages.ledWall, 600)} alt="LED Wall at event" width={600} height={400} className="rounded-xl shadow-2xl w-full max-w-lg" />
               </div>
             </FadeInOnScroll>
           </div>
