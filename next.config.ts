@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactCompiler: true,
   devIndicators: false,
+  env: {
+    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: "dwmqup5uo",
+    NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: "prashanthi_unsigned",
+  },
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
