@@ -99,7 +99,7 @@ export default function HomePage() {
   useEffect(() => {
     async function loadRecent() {
       try {
-        const { data } = await supabase.from("gallery_items").select("id, url, title").order("created_at", { ascending: false }).limit(6);
+        const { data } = await supabase.from("gallery_items").select("id, url, title, source").neq("source", "youtube").order("created_at", { ascending: false }).limit(6);
         if (data) setRecentPhotos(data);
       } catch {}
     }

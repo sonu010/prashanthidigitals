@@ -52,7 +52,7 @@ export default function InvoicesPage() {
     setLoadingSource(true);
     const [bRes, dRes] = await Promise.all([
       supabase.from("bookings").select("*").order("created_at", { ascending: false }),
-      supabase.from("daily_logs").select("*").eq("type", "event").order("date", { ascending: false }),
+      supabase.from("daily_logs").select("*").in("type", ["event", "walk-in"]).order("date", { ascending: false }),
     ]);
     if (bRes.data) setBookings(bRes.data);
     if (dRes.data) setDailyLogs(dRes.data);

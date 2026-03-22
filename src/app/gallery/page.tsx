@@ -9,27 +9,55 @@ interface GalleryItem {
   category: string;
   src: string;
   title: string;
+  source?: string;
+  public_id?: string;
+}
+
+function extractYouTubeId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+function getYouTubeThumbnail(videoId: string): string {
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 }
 
 export default function GalleryPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [videoModal, setVideoModal] = useState<string | null>(null);
   const [allItems, setAllItems] = useState<GalleryItem[]>([]);
   const [categories, setCategories] = useState<string[]>(["All"]);
 
   useEffect(() => {
     async function load() {
       try {
-        const { data } = await supabase.from("gallery_items").select("*").order("created_at", { ascending: false });
+        const { data } = await supabase
+          .from("gallery_items")
+          .select("*")
+          .order("created_at", { ascending: false });
         if (data) {
-          const items: GalleryItem[] = data.map((p: { id: string; category: string; url: string; title: string }) => ({
-            id: p.id,
-            category: p.category,
-            src: p.url,
-            title: p.title,
-          }));
+          const items: GalleryItem[] = data.map(
+            (p: { id: string; category: string; url: string; title: string; source?: string; public_id?: string }) => ({
+              id: p.id,
+              category: p.category,
+              src: p.url,
+              title: p.title,
+              source: p.source,
+              public_id: p.public_id,
+            })
+          );
           setAllItems(items);
-          // Build dynamic categories from actual photos
           const cats = Array.from(new Set(items.map((i) => i.category)));
           setCategories(["All", ...cats]);
         }
@@ -38,12 +66,22 @@ export default function GalleryPage() {
     load();
   }, []);
 
+  const isVideo = (item: GalleryItem) => item.source === "youtube";
+
   const filtered = activeCategory === "All" ? allItems : allItems.filter((item) => item.category === activeCategory);
+
+  const photos = filtered.filter((i) => !isVideo(i));
+  const videos = filtered.filter((i) => isVideo(i));
 
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
-  const prevImage = () => setLightboxIndex((prev) => (prev !== null ? (prev - 1 + filtered.length) % filtered.length : null));
-  const nextImage = () => setLightboxIndex((prev) => (prev !== null ? (prev + 1) % filtered.length : null));
+  const prevImage = () => setLightboxIndex((prev) => (prev !== null ? (prev - 1 + photos.length) % photos.length : null));
+  const nextImage = () => setLightboxIndex((prev) => (prev !== null ? (prev + 1) % photos.length : null));
+
+  const openVideo = (item: GalleryItem) => {
+    const videoId = item.public_id || extractYouTubeId(item.src);
+    if (videoId) setVideoModal(videoId);
+  };
 
   return (
     <>
@@ -57,6 +95,7 @@ export default function GalleryPage() {
 
       <section className="py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {/* Category filters */}
           <div className="flex flex-wrap gap-2 justify-center mb-10">
             {categories.map((cat) => (
               <button key={cat} onClick={() => setActiveCategory(cat)} className={"px-4 py-2 rounded-full text-sm font-medium transition " + (activeCategory === cat ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}>
@@ -64,52 +103,88 @@ export default function GalleryPage() {
               </button>
             ))}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-            {filtered.map((item, index) => (
-              <div key={item.id} onClick={() => openLightbox(index)} className="relative aspect-[4/3] rounded-lg overflow-hidden group cursor-pointer">
-                <Image src={item.src} alt={item.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-end">
-                  <p className="text-white text-sm p-3 opacity-0 group-hover:opacity-100 transition font-medium">{item.title}</p>
+
+          {/* Photo grid */}
+          {photos.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+              {photos.map((item, index) => (
+                <div key={item.id} onClick={() => openLightbox(index)} className="relative aspect-[4/3] rounded-lg overflow-hidden group cursor-pointer">
+                  <Image src={item.src} alt={item.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-end">
+                    <p className="text-white text-sm p-3 opacity-0 group-hover:opacity-100 transition font-medium">{item.title}</p>
+                  </div>
                 </div>
+              ))}
+            </div>
+          )}
+
+          {/* Videos section */}
+          {videos.length > 0 && (
+            <div className="mt-16">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-accent mb-2">Video Highlights</h2>
+                <p className="text-gray-500">Watch our highlight reels and wedding films</p>
               </div>
-            ))}
-          </div>
-          {filtered.length === 0 && <p className="text-center text-gray-400 py-20">No photos in this category yet. Check back soon!</p>}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {videos.map((item) => {
+                  const videoId = item.public_id || extractYouTubeId(item.src);
+                  return (
+                    <div key={item.id} onClick={() => openVideo(item)} className="relative aspect-video rounded-xl overflow-hidden group cursor-pointer shadow-md">
+                      {videoId && (
+                        <Image src={getYouTubeThumbnail(videoId)} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                      )}
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all flex items-center justify-center">
+                        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                          <svg className="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                        </div>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 p-4">
+                        <p className="text-white font-medium text-sm">{item.title}</p>
+                        <p className="text-gray-300 text-xs">{item.category}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {filtered.length === 0 && (
+            <p className="text-center text-gray-400 py-20">No photos or videos in this category yet. Check back soon!</p>
+          )}
         </div>
       </section>
 
-      {lightboxIndex !== null && (
+      {/* Photo lightbox */}
+      {lightboxIndex !== null && photos[lightboxIndex] && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <button onClick={(e) => { e.stopPropagation(); closeLightbox(); }} className="absolute top-4 right-4 text-white p-2 hover:bg-white/20 rounded-full z-10"><FiX className="w-8 h-8" /></button>
           <button onClick={(e) => { e.stopPropagation(); prevImage(); }} className="absolute left-4 text-white p-2 hover:bg-white/20 rounded-full z-10"><FiChevronLeft className="w-8 h-8" /></button>
           <button onClick={(e) => { e.stopPropagation(); nextImage(); }} className="absolute right-4 text-white p-2 hover:bg-white/20 rounded-full z-10"><FiChevronRight className="w-8 h-8" /></button>
           <div className="max-w-4xl w-full mx-4" onClick={(e) => e.stopPropagation()}>
-            <Image src={filtered[lightboxIndex].src} alt={filtered[lightboxIndex].title} width={900} height={675} className="w-full h-auto rounded-lg" />
-            <p className="text-white text-center mt-4 text-lg font-medium">{filtered[lightboxIndex].title}</p>
-            <p className="text-gray-400 text-center text-sm">{lightboxIndex + 1} / {filtered.length}</p>
+            <Image src={photos[lightboxIndex].src} alt={photos[lightboxIndex].title} width={900} height={675} className="w-full h-auto rounded-lg" />
+            <p className="text-white text-center mt-4 text-lg font-medium">{photos[lightboxIndex].title}</p>
+            <p className="text-gray-400 text-center text-sm">{lightboxIndex + 1} / {photos.length}</p>
           </div>
         </div>
       )}
 
-      <section className="py-16 md:py-24 bg-light-bg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-accent mb-2">Video Highlights</h2>
-            <p className="text-gray-500">Watch our highlight reels and wedding films</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="aspect-video bg-gray-200 rounded-xl flex items-center justify-center">
-                <div className="text-center text-gray-400">
-                  <p className="text-4xl mb-2">&#9654;</p>
-                  <p className="text-sm">Video Reel {i}</p>
-                  <p className="text-xs">(Coming Soon)</p>
-                </div>
-              </div>
-            ))}
+      {/* YouTube video modal */}
+      {videoModal && (
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setVideoModal(null)}>
+          <button onClick={() => setVideoModal(null)} className="absolute top-4 right-4 text-white p-2 hover:bg-white/20 rounded-full z-10"><FiX className="w-8 h-8" /></button>
+          <div className="w-full max-w-4xl aspect-video" onClick={(e) => e.stopPropagation()}>
+            <iframe
+              src={`https://www.youtube.com/embed/${videoModal}?autoplay=1`}
+              title="YouTube video"
+              className="w-full h-full rounded-lg"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
           </div>
         </div>
-      </section>
+      )}
     </>
   );
 }
