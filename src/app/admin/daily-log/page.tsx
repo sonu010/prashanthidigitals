@@ -71,18 +71,35 @@ export default function DailyLogPage() {
     customer_phone: "",
   });
   const [form, setForm] = useState(mkForm());
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const PAGE_SIZE = 50;
 
-  const fetchLogs = useCallback(async () => {
-    const { data } = await supabase
+  const fetchLogs = useCallback(async (pageNum = 0, append = false) => {
+    setError(null);
+    const today = new Date().toISOString().split("T")[0];
+    let query = supabase
       .from("daily_logs")
       .select("*")
       .order("date", { ascending: false })
-      .order("created_at", { ascending: false });
-    if (data) setLogs(data);
+      .order("created_at", { ascending: false })
+      .range(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE - 1);
+    const { data, error: fetchError } = await query;
+    if (fetchError) {
+      setError("Failed to load logs: " + fetchError.message);
+      setLoading(false);
+      return;
+    }
+    if (data) {
+      setLogs(prev => append ? [...prev, ...data] : data);
+      setHasMore(data.length === PAGE_SIZE);
+    }
     setLoading(false);
   }, []);
 
   useEffect(() => {
+    setFilterDate(new Date().toISOString().split("T")[0]);
     fetchLogs();
   }, [fetchLogs]);
 
@@ -101,6 +118,7 @@ export default function DailyLogPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setError(null);
     const row = {
       date: form.date,
       type: form.type,
@@ -110,15 +128,24 @@ export default function DailyLogPage() {
       customer_name: form.customer_name || null,
       customer_phone: form.customer_phone || null,
     };
+    let opError;
     if (editingId) {
-      await supabase.from("daily_logs").update(row).eq("id", editingId);
+      const { error: updateErr } = await supabase.from("daily_logs").update(row).eq("id", editingId);
+      opError = updateErr;
       setEditingId(null);
     } else {
-      await supabase.from("daily_logs").insert(row);
+      const { error: insertErr } = await supabase.from("daily_logs").insert(row);
+      opError = insertErr;
+    }
+    if (opError) {
+      setError("Save failed: " + opError.message + (opError.message.includes("policy") ? " — Please check Supabase RLS policies." : ""));
+      setSaving(false);
+      return;
     }
     setForm(mkForm());
     setShowForm(false);
     setSaving(false);
+    setPage(0);
     fetchLogs();
   };
 
@@ -138,8 +165,12 @@ export default function DailyLogPage() {
 
   const handleDelete = async (id: string) => {
     if (confirm("Delete this entry?")) {
-      await supabase.from("daily_logs").delete().eq("id", id);
-      fetchLogs();
+      const { error: delError } = await supabase.from("daily_logs").delete().eq("id", id);
+      if (delError) {
+        setError("Delete failed: " + delError.message);
+        return;
+      }
+      fetchLogs(0);
     }
   };
 
@@ -174,6 +205,13 @@ export default function DailyLogPage() {
       </header>
 
       <div className="max-w-4xl mx-auto p-4 sm:p-6">
+        {/* Error banner */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-4 flex items-center justify-between">
+            <p className="text-sm">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600 ml-3 shrink-0">✕</button>
+          </div>
+        )}
         {/* Summary chips — show count of each type for current filter */}
         <div className="flex flex-wrap gap-2 mb-5">
           {(Object.keys(typeLabels) as LogType[]).map((t) => (
@@ -466,6 +504,22 @@ export default function DailyLogPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Load More */}
+        {hasMore && dates.length > 0 && (
+          <div className="text-center mt-6">
+            <button
+              onClick={() => {
+                const next = page + 1;
+                setPage(next);
+                fetchLogs(next, true);
+              }}
+              className="px-6 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
+            >
+              Load More Entries
+            </button>
           </div>
         )}
       </div>

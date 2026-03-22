@@ -18,7 +18,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+        <Link
+          href="/admin/enquiries"
+          className="bg-orange-500 text-white rounded-xl p-4 text-center text-sm font-semibold hover:bg-orange-600 transition"
+        >
+          💬 Enquiries
+        </Link>
         <Link
           href="/admin/daily-log"
           className="bg-primary text-white rounded-xl p-4 text-center text-sm font-semibold hover:bg-primary-dark transition"

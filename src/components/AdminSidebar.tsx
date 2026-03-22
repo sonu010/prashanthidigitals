@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAdminAuth } from "@/context/AdminAuth";
+import { supabase } from "@/lib/supabase";
 import {
   FiGrid,
   FiCalendar,
@@ -13,10 +14,12 @@ import {
   FiMenu,
   FiX,
   FiBook,
+  FiMessageCircle,
 } from "react-icons/fi";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: <FiGrid className="w-5 h-5" /> },
+  { href: "/admin/enquiries", label: "Enquiries", icon: <FiMessageCircle className="w-5 h-5" />, badgeKey: "enquiries" as const },
   { href: "/admin/bookings", label: "Bookings", icon: <FiCalendar className="w-5 h-5" /> },
   { href: "/admin/daily-log", label: "Daily Log", icon: <FiBook className="w-5 h-5" /> },
   { href: "/admin/invoices", label: "Invoices", icon: <FiDollarSign className="w-5 h-5" /> },
@@ -26,8 +29,22 @@ const navItems = [
 
 export default function AdminSidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [newEnquiryCount, setNewEnquiryCount] = useState(0);
   const pathname = usePathname();
   const { logout } = useAdminAuth();
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { count } = await supabase
+        .from("enquiries")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "new");
+      setNewEnquiryCount(count || 0);
+    };
+    fetchCount();
+    const interval = setInterval(fetchCount, 30000); // refresh every 30s
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
@@ -86,6 +103,11 @@ export default function AdminSidebar() {
               >
                 {item.icon}
                 {item.label}
+                {"badgeKey" in item && item.badgeKey === "enquiries" && newEnquiryCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-pulse">
+                    {newEnquiryCount}
+                  </span>
+                )}
               </Link>
             );
           })}
