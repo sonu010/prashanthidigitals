@@ -18,6 +18,25 @@ interface Invoice {
 interface BookingRecord { id: string; customer_name: string; customer_phone: string; event_type: string; event_date: string; event_location: string; services: string[]; status: string; }
 interface DailyLogRecord { id: string; date: string; type: string; title: string; description: string; amount?: number; customer_name?: string; customer_phone?: string; }
 
+/** Format yyyy-mm-dd → dd/mm/yyyy */
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-");
+  if (!y || !m || !d) return dateStr;
+  return `${d}/${m}/${y}`;
+}
+
+/** Map a raw Supabase invoice row → Invoice (handles event_date → date) */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rowToInvoice(row: any): Invoice {
+  return {
+    ...row,
+    date: row.event_date || row.date || new Date().toISOString().split("T")[0],
+    items: Array.isArray(row.items) ? row.items : [],
+    advance_paid: row.advance_paid ?? 0,
+  };
+}
+
 const emptyInvoice = (): Invoice => ({
   invoice_number: "PS-" + Date.now().toString().slice(-6), date: new Date().toISOString().split("T")[0],
   customer_name: "", customer_phone: "", customer_email: "", event_type: "",
@@ -42,7 +61,7 @@ export default function InvoicesPage() {
 
   const fetchInvoices = useCallback(async () => {
     const { data } = await supabase.from("invoices").select("*").order("created_at", { ascending: false });
-    if (data) setInvoices(data as Invoice[]);
+    if (data) setInvoices(data.map(rowToInvoice) as Invoice[]);
     setLoading(false);
   }, []);
 
@@ -141,8 +160,13 @@ export default function InvoicesPage() {
     setMode("create");
   };
 
+  const printInvoice = (inv: Invoice) => {
+    setInvoice(rowToInvoice(inv));
+    setMode("preview");
+  };
+
   const editInvoice = (inv: Invoice) => {
-    setInvoice({ ...inv, items: Array.isArray(inv.items) ? inv.items : [] });
+    setInvoice(rowToInvoice(inv));
     setMode("create");
   };
 
@@ -195,7 +219,7 @@ export default function InvoicesPage() {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-accent text-sm">{b.customer_name}</h3>
                         <p className="text-xs text-gray-500">{b.customer_phone} &middot; {b.event_type}</p>
-                        <p className="text-xs text-gray-400">{b.event_date}{b.event_location ? " — " + b.event_location : ""}</p>
+                        <p className="text-xs text-gray-400">{formatDate(b.event_date)}{b.event_location ? " — " + b.event_location : ""}</p>
                       </div>
                       <span className="text-xs text-primary font-medium shrink-0">Use &rarr;</span>
                     </div>
@@ -212,7 +236,7 @@ export default function InvoicesPage() {
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-accent text-sm">{l.title}</h3>
-                        <p className="text-xs text-gray-500">{l.customer_name || "—"} &middot; {l.date}</p>
+                        <p className="text-xs text-gray-500">{l.customer_name || "—"} &middot; {formatDate(l.date)}</p>
                         {l.amount ? <p className="text-xs text-green-600 font-medium">&#8377;{l.amount.toLocaleString()}</p> : null}
                       </div>
                       <span className="text-xs text-primary font-medium shrink-0">Use &rarr;</span>
@@ -234,13 +258,13 @@ export default function InvoicesPage() {
                     <h3 className="font-semibold text-accent text-sm">{inv.invoice_number}</h3>
                     <span className={"px-2 py-0.5 rounded-full text-xs font-medium " + (inv.status === "paid" ? "bg-green-100 text-green-700" : inv.status === "partial" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700")}>{inv.status}</span>
                   </div>
-                  <p className="text-xs text-gray-500">{inv.customer_name} &middot; {inv.date}</p>
+                  <p className="text-xs text-gray-500">{inv.customer_name} &middot; {formatDate(inv.date)}</p>
                   {inv.event_type && <p className="text-xs text-gray-400">{inv.event_type}</p>}
                   <p className="text-sm font-bold text-accent mt-1">&#8377;{(inv.total || 0).toLocaleString()}</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <button onClick={() => editInvoice(inv)} className="text-xs text-primary font-medium hover:underline">Edit</button>
-                  <button onClick={() => { editInvoice(inv); setTimeout(() => setMode("preview"), 100); }} className="text-xs text-gray-500 font-medium hover:underline">Print</button>
+                  <button onClick={() => printInvoice(inv)} className="text-xs text-gray-500 font-medium hover:underline">Print</button>
                   <button onClick={() => deleteInvoice(inv.id!)} className="p-1.5 text-gray-400 hover:text-red-500"><FiTrash2 className="w-4 h-4" /></button>
                 </div>
               </div>
@@ -302,7 +326,7 @@ export default function InvoicesPage() {
             <div ref={printRef}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:30,paddingBottom:20,borderBottom:"3px solid #c8102e"}}>
                 <div><div style={{fontSize:22,fontWeight:"bold",color:"#c8102e"}}>Prashanthi Digital Studio</div><div style={{fontSize:13,color:"#666"}}>& LED Walls</div><div style={{fontSize:11,color:"#888",marginTop:6,lineHeight:1.6}}>Nacharam, Hyderabad, Telangana<br/>Phone: +91 9948670396<br/>Email: prashanthistudio@gmail.com</div></div>
-                <div style={{textAlign:"right"}}><div style={{fontSize:24,fontWeight:"bold",color:"#1a1a2e"}}>INVOICE</div><div style={{fontSize:12,color:"#666",marginTop:4}}>#{invoice.invoice_number}<br/>Date: {new Date(invoice.date + "T00:00:00").toLocaleDateString("en-IN", {day:"numeric",month:"long",year:"numeric"})}</div><div style={{display:"inline-block",padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:"bold",marginTop:8,background:invoice.status==="paid"?"#dcfce7":invoice.status==="partial"?"#fef3c7":"#fee2e2",color:invoice.status==="paid"?"#166534":invoice.status==="partial"?"#92400e":"#991b1b"}}>{invoice.status === "paid" ? "PAID" : invoice.status === "partial" ? "PARTIALLY PAID" : "UNPAID"}</div></div>
+                <div style={{textAlign:"right"}}><div style={{fontSize:24,fontWeight:"bold",color:"#1a1a2e"}}>INVOICE</div><div style={{fontSize:12,color:"#666",marginTop:4}}>#{invoice.invoice_number}<br/>Date: {formatDate(invoice.date)}</div><div style={{display:"inline-block",padding:"3px 12px",borderRadius:20,fontSize:11,fontWeight:"bold",marginTop:8,background:invoice.status==="paid"?"#dcfce7":invoice.status==="partial"?"#fef3c7":"#fee2e2",color:invoice.status==="paid"?"#166534":invoice.status==="partial"?"#92400e":"#991b1b"}}>{invoice.status === "paid" ? "PAID" : invoice.status === "partial" ? "PARTIALLY PAID" : "UNPAID"}</div></div>
               </div>
               <div style={{marginBottom:25}}><div style={{fontSize:10,fontWeight:"bold",color:"#999",textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Bill To</div><div style={{fontWeight:"bold",color:"#1a1a2e",fontSize:15}}>{invoice.customer_name || "Customer Name"}</div>{invoice.customer_phone && <div style={{fontSize:12,color:"#666"}}>{invoice.customer_phone}</div>}{invoice.customer_email && <div style={{fontSize:12,color:"#666"}}>{invoice.customer_email}</div>}{invoice.event_type && <div style={{fontSize:12,color:"#888",marginTop:2}}>Event: {invoice.event_type}</div>}</div>
               <table style={{width:"100%",borderCollapse:"collapse",marginBottom:20}}><thead><tr style={{background:"#f8f8f8"}}><th style={{textAlign:"left",padding:"10px 12px",fontSize:11,color:"#666",fontWeight:600,borderBottom:"2px solid #eee"}}>#</th><th style={{textAlign:"left",padding:"10px 12px",fontSize:11,color:"#666",fontWeight:600,borderBottom:"2px solid #eee"}}>Description</th><th style={{textAlign:"center",padding:"10px 12px",fontSize:11,color:"#666",fontWeight:600,borderBottom:"2px solid #eee"}}>Qty</th><th style={{textAlign:"right",padding:"10px 12px",fontSize:11,color:"#666",fontWeight:600,borderBottom:"2px solid #eee"}}>Rate</th><th style={{textAlign:"right",padding:"10px 12px",fontSize:11,color:"#666",fontWeight:600,borderBottom:"2px solid #eee"}}>Amount</th></tr></thead><tbody>{invoice.items.map((item, idx) => <tr key={item.id}><td style={{padding:"10px 12px",borderBottom:"1px solid #f0f0f0",color:"#999"}}>{idx+1}</td><td style={{padding:"10px 12px",borderBottom:"1px solid #f0f0f0",fontWeight:500}}>{item.description || "\u2014"}</td><td style={{padding:"10px 12px",borderBottom:"1px solid #f0f0f0",textAlign:"center"}}>{item.qty}</td><td style={{padding:"10px 12px",borderBottom:"1px solid #f0f0f0",textAlign:"right"}}>&#8377;{item.rate.toLocaleString()}</td><td style={{padding:"10px 12px",borderBottom:"1px solid #f0f0f0",textAlign:"right",fontWeight:500}}>&#8377;{(item.qty*item.rate).toLocaleString()}</td></tr>)}</tbody></table>
