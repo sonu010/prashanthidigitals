@@ -1,56 +1,52 @@
 "use client";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { supabase } from "@/lib/supabase";
+import type { Session } from "@supabase/supabase-js";
 
 interface AdminAuthContextType {
   isAuthenticated: boolean;
-  login: (password: string) => boolean;
-  logout: () => void;
+  isLoading: boolean;
+  session: Session | null;
+  login: (email: string, password: string) => Promise<string | null>;
+  logout: () => Promise<void>;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType>({
   isAuthenticated: false,
-  login: () => false,
-  logout: () => {},
+  isLoading: true,
+  session: null,
+  login: async () => null,
+  logout: async () => {},
 });
 
-// Simple password-based auth. Change this password!
-const ADMIN_PASSWORD = "prashanthi@2026";
-
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("admin_auth");
-    if (stored === "true") {
-      const expiry = localStorage.getItem("admin_auth_expiry");
-      if (expiry && new Date(expiry) > new Date()) {
-        setIsAuthenticated(true);
-      } else {
-        localStorage.removeItem("admin_auth");
-        localStorage.removeItem("admin_auth_expiry");
-      }
-    }
-    setIsLoading(false);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      setIsLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (password: string) => {
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      localStorage.setItem("admin_auth", "true");
-      // Session expires in 24 hours
-      const expiry = new Date();
-      expiry.setHours(expiry.getHours() + 24);
-      localStorage.setItem("admin_auth_expiry", expiry.toISOString());
-      return true;
-    }
-    return false;
+  const login = async (email: string, password: string): Promise<string | null> => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return error.message;
+    return null;
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem("admin_auth");
-    localStorage.removeItem("admin_auth_expiry");
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
   };
 
   if (isLoading) {
@@ -62,7 +58,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AdminAuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AdminAuthContext.Provider value={{ isAuthenticated: !!session, isLoading, session, login, logout }}>
       {children}
     </AdminAuthContext.Provider>
   );

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { FiCheck } from "react-icons/fi";
+import { supabase } from "@/lib/supabase";
 
 const eventTypes = [
   "Wedding",
@@ -49,10 +50,21 @@ export default function BookPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In production: Send to API endpoint which stores in DB & sends notifications
-    console.log("Booking submitted:", formData);
+    try {
+      await supabase.from("bookings").insert({
+        customer_name: formData.name,
+        customer_phone: formData.phone,
+        customer_email: formData.email || null,
+        event_type: formData.eventType,
+        event_date: formData.eventDate,
+        event_location: formData.venue || null,
+        services: formData.services,
+        requirements: formData.notes || null,
+        status: "pending",
+      });
+    } catch {}
     setSubmitted(true);
   };
 

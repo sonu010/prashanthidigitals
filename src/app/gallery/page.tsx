@@ -3,15 +3,14 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { cloudinaryUrl, defaultGalleryPhotos } from "@/lib/cloudinary";
+import { supabase } from "@/lib/supabase";
 
 const categories = ["All", "Weddings", "Pre-Wedding", "Birthdays", "Ceremonies", "LED Wall"];
-const ADMIN_GALLERY_KEY = "prashanthi_gallery";
 
 interface GalleryItem {
-  id: number;
+  id: number | string;
   category: string;
   src: string;
-  publicId?: string;
   title: string;
 }
 
@@ -21,31 +20,33 @@ export default function GalleryPage() {
   const [allItems, setAllItems] = useState<GalleryItem[]>([]);
 
   useEffect(() => {
-    // Merge default Cloudinary photos + admin-uploaded photos
-    const defaults: GalleryItem[] = defaultGalleryPhotos.map((p) => ({
-      id: p.id,
-      category: p.category,
-      src: cloudinaryUrl(p.publicId, 800),
-      publicId: p.publicId,
-      title: p.title,
-    }));
+    async function load() {
+      // Default photos from Cloudinary mapping
+      const defaults: GalleryItem[] = defaultGalleryPhotos.map((p) => ({
+        id: p.id,
+        category: p.category,
+        src: cloudinaryUrl(p.publicId, 800),
+        title: p.title,
+      }));
 
-    // Admin-uploaded photos from gallery manager (stored in localStorage)
-    let adminPhotos: GalleryItem[] = [];
-    try {
-      const stored = localStorage.getItem(ADMIN_GALLERY_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        adminPhotos = parsed.map((p: { id: number; category: string; cloudinaryUrl?: string; src?: string; title: string }) => ({
-          id: p.id,
-          category: p.category,
-          src: p.cloudinaryUrl || p.src || "",
-          title: p.title,
-        }));
-      }
-    } catch {}
+      // Admin-uploaded photos from Supabase
+      let adminPhotos: GalleryItem[] = [];
+      try {
+        const { data } = await supabase.from("gallery_items").select("*").order("created_at", { ascending: false });
+        if (data) {
+          adminPhotos = data.map((p: { id: string; category: string; url: string; title: string }) => ({
+            id: p.id,
+            category: p.category,
+            src: p.url,
+            title: p.title,
+          }));
+        }
+      } catch {}
 
-    setAllItems([...defaults, ...adminPhotos]);
+      // Admin photos first, then defaults
+      setAllItems([...adminPhotos, ...defaults]);
+    }
+    load();
   }, []);
 
   const filtered = activeCategory === "All" ? allItems : allItems.filter((item) => item.category === activeCategory);
@@ -57,7 +58,6 @@ export default function GalleryPage() {
 
   return (
     <>
-      {/* Page Header */}
       <section className="bg-accent py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-gold font-semibold text-sm uppercase tracking-wider mb-2">Our Work</p>
@@ -66,19 +66,15 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* Gallery */}
       <section className="py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          {/* Category Tabs */}
           <div className="flex flex-wrap gap-2 justify-center mb-10">
             {categories.map((cat) => (
-              <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-2 rounded-full text-sm font-medium transition ${activeCategory === cat ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+              <button key={cat} onClick={() => setActiveCategory(cat)} className={"px-4 py-2 rounded-full text-sm font-medium transition " + (activeCategory === cat ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}>
                 {cat} ({cat === "All" ? allItems.length : allItems.filter((i) => i.category === cat).length})
               </button>
             ))}
           </div>
-
-          {/* Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {filtered.map((item, index) => (
               <div key={item.id} onClick={() => openLightbox(index)} className="relative aspect-[4/3] rounded-lg overflow-hidden group cursor-pointer">
@@ -89,12 +85,10 @@ export default function GalleryPage() {
               </div>
             ))}
           </div>
-
           {filtered.length === 0 && <p className="text-center text-gray-400 py-20">No photos in this category yet. Check back soon!</p>}
         </div>
       </section>
 
-      {/* Lightbox */}
       {lightboxIndex !== null && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <button onClick={(e) => { e.stopPropagation(); closeLightbox(); }} className="absolute top-4 right-4 text-white p-2 hover:bg-white/20 rounded-full z-10"><FiX className="w-8 h-8" /></button>
@@ -108,7 +102,6 @@ export default function GalleryPage() {
         </div>
       )}
 
-      {/* Video Section */}
       <section className="py-16 md:py-24 bg-light-bg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
@@ -121,7 +114,7 @@ export default function GalleryPage() {
                 <div className="text-center text-gray-400">
                   <p className="text-4xl mb-2">&#9654;</p>
                   <p className="text-sm">Video Reel {i}</p>
-                  <p className="text-xs">(Embed YouTube here)</p>
+                  <p className="text-xs">(Coming Soon)</p>
                 </div>
               </div>
             ))}
