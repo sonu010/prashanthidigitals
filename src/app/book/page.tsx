@@ -2,18 +2,7 @@
 import { useState } from "react";
 import { FiCheck } from "react-icons/fi";
 import { supabase } from "@/lib/supabase";
-
-const eventTypes = [
-  "Wedding",
-  "Birthday",
-  "Pre-Wedding",
-  "Engagement",
-  "Corporate Event",
-  "Religious Ceremony",
-  "LED Wall Only",
-  "Combo Package",
-  "Other",
-];
+import { eventCategories } from "@/lib/eventCategories";
 
 const budgetRanges = [
   "Under ₹10,000",
@@ -211,10 +200,14 @@ export default function BookPage() {
                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                   >
                     <option value="">Select event type</option>
-                    {eventTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
+                    {eventCategories.map((cat) => (
+                      <optgroup key={cat.value} label={cat.label}>
+                        {cat.subTypes.map((sub) => (
+                          <option key={sub.value} value={sub.value}>
+                            {sub.label}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>

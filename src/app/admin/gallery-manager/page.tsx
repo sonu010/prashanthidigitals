@@ -3,9 +3,10 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { FiPlus, FiTrash2, FiUploadCloud, FiLoader } from "react-icons/fi";
 import { supabase } from "@/lib/supabase";
+import { galleryCategories } from "@/lib/eventCategories";
 
 interface GalleryPhoto { id: string; category: string; url: string; title: string; public_id?: string; }
-const categories = ["All", "Weddings", "Pre-Wedding", "Birthdays", "Ceremonies", "Haldi", "Reception", "LED Wall"];
+const allCategories = ["All", ...galleryCategories];
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "";
 
 export default function GalleryManagerPage() {
@@ -13,7 +14,7 @@ export default function GalleryManagerPage() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
   const [showUpload, setShowUpload] = useState(false);
-  const [newPhoto, setNewPhoto] = useState({ title: "", category: "Weddings" });
+  const [newPhoto, setNewPhoto] = useState({ title: "", category: galleryCategories[0] });
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -59,7 +60,6 @@ export default function GalleryManagerPage() {
       const data = await res.json();
       if (data.error) { setUploadError(data.error.message); setUploading(false); return; }
 
-      // Save to Supabase
       await supabase.from("gallery_items").insert({
         url: data.secure_url,
         public_id: data.public_id,
@@ -68,7 +68,7 @@ export default function GalleryManagerPage() {
         source: "cloudinary",
       });
 
-      setNewPhoto({ title: "", category: "Weddings" });
+      setNewPhoto({ title: "", category: galleryCategories[0] });
       setPreviewUrl(null);
       setSelectedFile(null);
       setShowUpload(false);
@@ -96,7 +96,9 @@ export default function GalleryManagerPage() {
             <form onSubmit={handleUpload} className="space-y-3">
               <div className="grid sm:grid-cols-2 gap-3">
                 <input type="text" required value={newPhoto.title} onChange={(e) => setNewPhoto({ ...newPhoto, title: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Photo title" />
-                <select value={newPhoto.category} onChange={(e) => setNewPhoto({ ...newPhoto, category: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">{categories.filter((c) => c !== "All").map((c) => <option key={c} value={c}>{c}</option>)}</select>
+                <select value={newPhoto.category} onChange={(e) => setNewPhoto({ ...newPhoto, category: e.target.value })} className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
+                  {galleryCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
               </div>
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                 {previewUrl ? (
@@ -116,7 +118,7 @@ export default function GalleryManagerPage() {
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-6">{categories.map((cat) => <button key={cat} onClick={() => setActiveCategory(cat)} className={"px-4 py-2 rounded-full text-sm font-medium transition " + (activeCategory === cat ? "bg-primary text-white" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50")}>{cat} ({cat === "All" ? photos.length : photos.filter((p) => p.category === cat).length})</button>)}</div>
+        <div className="flex flex-wrap gap-2 mb-6">{allCategories.map((cat) => <button key={cat} onClick={() => setActiveCategory(cat)} className={"px-4 py-2 rounded-full text-sm font-medium transition " + (activeCategory === cat ? "bg-primary text-white" : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50")}>{cat} ({cat === "All" ? photos.length : photos.filter((p) => p.category === cat).length})</button>)}</div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {filtered.map((photo) => (

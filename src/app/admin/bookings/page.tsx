@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { FiSearch, FiFilter, FiPlus, FiTrash2 } from "react-icons/fi";
 import { supabase } from "@/lib/supabase";
+import { eventCategories } from "@/lib/eventCategories";
 
 interface Booking {
   id: string;
@@ -27,7 +28,7 @@ export default function BookingsPage() {
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ customer_name: "", customer_phone: "", event_type: "Wedding", event_date: "", event_location: "", services: ["Photography"], status: "pending" });
+  const [form, setForm] = useState({ customer_name: "", customer_phone: "", event_type: "", event_date: "", event_location: "", services: ["Photography"], status: "pending" });
 
   const fetchBookings = useCallback(async () => {
     const { data } = await supabase.from("bookings").select("*").order("created_at", { ascending: false });
@@ -63,7 +64,7 @@ export default function BookingsPage() {
       services: form.services,
       status: form.status,
     });
-    setForm({ customer_name: "", customer_phone: "", event_type: "Wedding", event_date: "", event_location: "", services: ["Photography"], status: "pending" });
+    setForm({ customer_name: "", customer_phone: "", event_type: "", event_date: "", event_location: "", services: ["Photography"], status: "pending" });
     setShowForm(false);
     setSaving(false);
     fetchBookings();
@@ -85,7 +86,14 @@ export default function BookingsPage() {
               <div className="grid sm:grid-cols-2 gap-3">
                 <input type="text" required value={form.customer_name} onChange={(e) => setForm({...form, customer_name: e.target.value})} placeholder="Customer Name" className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" />
                 <input type="tel" required value={form.customer_phone} onChange={(e) => setForm({...form, customer_phone: e.target.value})} placeholder="Phone" className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" />
-                <select value={form.event_type} onChange={(e) => setForm({...form, event_type: e.target.value})} className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"><option>Wedding</option><option>Birthday</option><option>Pre-Wedding</option><option>Corporate</option><option>Engagement</option><option>Naming Ceremony</option><option>LED Wall</option><option>Other</option></select>
+                <select value={form.event_type} onChange={(e) => setForm({...form, event_type: e.target.value})} className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
+                  <option value="">Select event type</option>
+                  {eventCategories.map((cat) => (
+                    <optgroup key={cat.value} label={cat.label}>
+                      {cat.subTypes.map((sub) => <option key={sub.value} value={sub.value}>{sub.label}</option>)}
+                    </optgroup>
+                  ))}
+                </select>
                 <input type="date" required value={form.event_date} onChange={(e) => setForm({...form, event_date: e.target.value})} className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" />
                 <input type="text" value={form.event_location} onChange={(e) => setForm({...form, event_location: e.target.value})} placeholder="Venue" className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" />
               </div>

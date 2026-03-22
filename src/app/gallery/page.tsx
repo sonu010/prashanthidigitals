@@ -2,13 +2,10 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { cloudinaryUrl, defaultGalleryPhotos } from "@/lib/cloudinary";
 import { supabase } from "@/lib/supabase";
 
-const categories = ["All", "Weddings", "Pre-Wedding", "Birthdays", "Ceremonies", "LED Wall"];
-
 interface GalleryItem {
-  id: number | string;
+  id: string;
   category: string;
   src: string;
   title: string;
@@ -18,33 +15,25 @@ export default function GalleryPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [allItems, setAllItems] = useState<GalleryItem[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
 
   useEffect(() => {
     async function load() {
-      // Default photos from Cloudinary mapping
-      const defaults: GalleryItem[] = defaultGalleryPhotos.map((p) => ({
-        id: p.id,
-        category: p.category,
-        src: cloudinaryUrl(p.publicId, 800),
-        title: p.title,
-      }));
-
-      // Admin-uploaded photos from Supabase
-      let adminPhotos: GalleryItem[] = [];
       try {
         const { data } = await supabase.from("gallery_items").select("*").order("created_at", { ascending: false });
         if (data) {
-          adminPhotos = data.map((p: { id: string; category: string; url: string; title: string }) => ({
+          const items: GalleryItem[] = data.map((p: { id: string; category: string; url: string; title: string }) => ({
             id: p.id,
             category: p.category,
             src: p.url,
             title: p.title,
           }));
+          setAllItems(items);
+          // Build dynamic categories from actual photos
+          const cats = Array.from(new Set(items.map((i) => i.category)));
+          setCategories(["All", ...cats]);
         }
       } catch {}
-
-      // Admin photos first, then defaults
-      setAllItems([...adminPhotos, ...defaults]);
     }
     load();
   }, []);

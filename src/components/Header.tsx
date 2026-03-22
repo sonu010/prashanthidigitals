@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FiMenu, FiX, FiPhone } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 
@@ -24,9 +25,13 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg">
-              P
-            </div>
+            <Image
+              src="/images/logo/logo.jpeg"
+              alt="Prashanthi Digital Studio Logo"
+              width={48}
+              height={48}
+              className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover"
+            />
             <div className="leading-tight">
               <span className="text-primary font-bold text-sm md:text-base block">
                 Prashanthi

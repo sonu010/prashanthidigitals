@@ -4,7 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { FiCamera, FiFilm, FiMonitor, FiStar, FiArrowRight, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import FadeInOnScroll from "@/components/FadeInOnScroll";
-import { cloudinaryUrl, siteImages, defaultGalleryPhotos } from "@/lib/cloudinary";
+import { cloudinaryUrl, siteImages } from "@/lib/cloudinary";
+import { homePageEventTypes } from "@/lib/eventCategories";
+import { supabase } from "@/lib/supabase";
 
 const services = [
   {
@@ -54,11 +56,6 @@ const testimonials = [
   },
 ];
 
-const eventTypes = [
-  "Weddings", "Pre-Wedding", "Birthdays", "Baby Shoots",
-  "Corporate", "Religious Ceremonies", "LED Wall Events", "College Events",
-];
-
 const heroWords = ["Precious Moments", "Wedding Stories", "Celebrations", "Beautiful Memories"];
 
 function useTypewriter(words: string[], typingSpeed = 100, pauseTime = 2000) {
@@ -97,6 +94,17 @@ function useTypewriter(words: string[], typingSpeed = 100, pauseTime = 2000) {
 export default function HomePage() {
   const typedText = useTypewriter(heroWords, 80, 2500);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [recentPhotos, setRecentPhotos] = useState<{id: string; url: string; title: string}[]>([]);
+
+  useEffect(() => {
+    async function loadRecent() {
+      try {
+        const { data } = await supabase.from("gallery_items").select("id, url, title").order("created_at", { ascending: false }).limit(6);
+        if (data) setRecentPhotos(data);
+      } catch {}
+    }
+    loadRecent();
+  }, []);
 
   const nextTestimonial = useCallback(() => {
     setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -212,7 +220,7 @@ export default function HomePage() {
       {/* Event Types */}
       <section className="bg-[var(--primary)] py-5 overflow-hidden">
         <div className="flex gap-8 justify-center flex-wrap px-4">
-          {eventTypes.map((event) => (
+          {homePageEventTypes.map((event) => (
             <span key={event} className="text-white/90 text-sm md:text-base font-medium whitespace-nowrap">
               &#10022; {event}
             </span>
@@ -230,14 +238,19 @@ export default function HomePage() {
             </div>
           </FadeInOnScroll>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-            {defaultGalleryPhotos.slice(0, 6).map((photo, i) => (
+            {recentPhotos.map((photo, i) => (
               <FadeInOnScroll key={photo.id} delay={i * 100}>
                 <div className="relative aspect-[4/3] rounded-lg overflow-hidden group cursor-pointer">
-                  <Image src={cloudinaryUrl(photo.publicId, 600)} alt={photo.title} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <Image src={photo.url} alt={photo.title} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all" />
                 </div>
               </FadeInOnScroll>
             ))}
+            {recentPhotos.length === 0 && (
+              <div className="col-span-full text-center py-12 text-gray-400">
+                <p className="text-sm">Gallery photos will appear here once uploaded.</p>
+              </div>
+            )}
           </div>
           <div className="text-center mt-8">
             <Link href="/gallery" className="inline-flex items-center gap-2 bg-[var(--primary)] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[var(--primary-dark)] transition">
