@@ -3,9 +3,11 @@ import { useState } from "react";
 import { FiMapPin, FiPhone, FiMail, FiClock, FiCheck } from "react-icons/fi";
 import { FaWhatsapp } from "react-icons/fa";
 import GoogleMapEmbed from "@/components/GoogleMapEmbed";
+import PhoneInput from "@/components/PhoneInput";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [phone, setPhone] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,14 +153,11 @@ export default function ContactPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone *
-                      </label>
-                      <input
-                        type="tel"
+                      <PhoneInput
+                        label="Phone"
                         required
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                        placeholder="+91 9948670396"
+                        value={phone}
+                        onChange={setPhone}
                       />
                     </div>
                   </div>
@@ -181,6 +180,8 @@ export default function ContactPage() {
                       <option>Photography Enquiry</option>
                       <option>Videography Enquiry</option>
                       <option>LED Wall Rental</option>
+                      <option>Drone Shooting</option>
+                      <option>Jimmy Jib</option>
                       <option>Package / Pricing</option>
                       <option>General Question</option>
                     </select>

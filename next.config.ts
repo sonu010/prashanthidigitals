@@ -3,6 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactCompiler: true,
   devIndicators: false,
+  /**
+   * These NEXT_PUBLIC_ keys are intentionally public (client-side safe).
+   * Supabase anon key: designed for browser use; security enforced by Supabase RLS policies.
+   * Cloudinary: public cloud name & unsigned upload preset for client uploads.
+   * Ideally, move these to Vercel Dashboard → Environment Variables and remove from here.
+   */
   env: {
     NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: "dwmqup5uo",
     NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET: "prashanthi_unsigned",

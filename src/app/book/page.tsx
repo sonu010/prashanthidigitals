@@ -3,6 +3,7 @@ import { useState } from "react";
 import { FiCheck } from "react-icons/fi";
 import { supabase } from "@/lib/supabase";
 import { eventCategories } from "@/lib/eventCategories";
+import PhoneInput from "@/components/PhoneInput";
 
 const budgetRanges = [
   "Under ₹10,000",
@@ -15,6 +16,7 @@ const budgetRanges = [
 
 export default function BookPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -41,6 +43,14 @@ export default function BookPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = "Name is required";
+    if (!formData.phone || !/^[6-9]\d{9}$/.test(formData.phone)) newErrors.phone = "Enter a valid 10-digit mobile number";
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Enter a valid email address";
+    if (!formData.eventType) newErrors.eventType = "Select an event type";
+    if (!formData.eventDate) newErrors.eventDate = "Select an event date";
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    setErrors({});
     try {
       await supabase.from("bookings").insert({
         customer_name: formData.name,
@@ -147,23 +157,17 @@ export default function BookPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                    className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors.name ? "border-red-400" : "border-gray-300"}`}
                     placeholder="Your full name"
                   />
+                  {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mobile Number *
-                  </label>
-                  <input
-                    type="tel"
+                  <PhoneInput
+                    label="Mobile Number"
                     required
                     value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                    placeholder="+91 9988776655"
+                    onChange={(v) => setFormData({ ...formData, phone: v })}
                   />
                 </div>
                 <div className="sm:col-span-2">
@@ -176,9 +180,10 @@ export default function BookPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                    className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors.email ? "border-red-400" : "border-gray-300"}`}
                     placeholder="your@email.com (optional)"
                   />
+                  {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                 </div>
               </div>
             </div>
@@ -197,7 +202,7 @@ export default function BookPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, eventType: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                    className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none ${errors.eventType ? "border-red-400" : "border-gray-300"}`}
                   >
                     <option value="">Select event type</option>
                     {eventCategories.map((cat) => (
@@ -210,6 +215,7 @@ export default function BookPage() {
                       </optgroup>
                     ))}
                   </select>
+                  {errors.eventType && <p className="text-red-500 text-xs mt-1">{errors.eventType}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -291,8 +297,8 @@ export default function BookPage() {
             {/* Service Selection */}
             <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
               <h3 className="font-bold text-accent text-lg mb-4">Services Required</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {["Photography", "Videography", "LED Wall", "Combo Package"].map(
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {["Photography", "Videography", "LED Wall", "Drone", "Jimmy Jib", "Combo Package"].map(
                   (service) => (
                     <label
                       key={service}

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { FiPlus, FiTrash2, FiPrinter, FiList, FiFileText } from "react-icons/fi";
 import { supabase } from "@/lib/supabase";
 import { eventCategories } from "@/lib/eventCategories";
+import PhoneInput from "@/components/PhoneInput";
 
 interface InvoiceItem { id: number; description: string; qty: number; rate: number; }
 interface Invoice {
@@ -286,7 +287,7 @@ export default function InvoicesPage() {
               <h3 className="font-bold text-accent mb-4">Customer</h3>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">Name *</label><input type="text" value={invoice.customer_name} onChange={(e) => setInvoice({...invoice, customer_name: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Full name" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Phone</label><input type="tel" value={invoice.customer_phone} onChange={(e) => setInvoice({...invoice, customer_phone: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" /></div>
+                <div><PhoneInput label="Phone" value={invoice.customer_phone} onChange={(v) => setInvoice({...invoice, customer_phone: v})} /></div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" value={invoice.customer_email} onChange={(e) => setInvoice({...invoice, customer_email: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" /></div>
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
                   <select value={invoice.event_type} onChange={(e) => setInvoice({...invoice, event_type: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FiSearch, FiFilter, FiPlus, FiTrash2 } from "react-icons/fi";
 import { supabase } from "@/lib/supabase";
 import { eventCategories } from "@/lib/eventCategories";
+import PhoneInput from "@/components/PhoneInput";
 
 interface Booking {
   id: string;
@@ -85,7 +86,7 @@ export default function BookingsPage() {
             <form onSubmit={handleAdd} className="space-y-3">
               <div className="grid sm:grid-cols-2 gap-3">
                 <input type="text" required value={form.customer_name} onChange={(e) => setForm({...form, customer_name: e.target.value})} placeholder="Customer Name" className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" />
-                <input type="tel" required value={form.customer_phone} onChange={(e) => setForm({...form, customer_phone: e.target.value})} placeholder="Phone" className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none" />
+                <PhoneInput value={form.customer_phone} onChange={(v) => setForm({...form, customer_phone: v})} required placeholder="9988776655" />
                 <select value={form.event_type} onChange={(e) => setForm({...form, event_type: e.target.value})} className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
                   <option value="">Select event type</option>
                   {eventCategories.map((cat) => (

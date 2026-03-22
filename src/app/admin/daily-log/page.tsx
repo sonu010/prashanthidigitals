@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { FiPlus, FiTrash2, FiEdit2, FiCalendar, FiFilter } from "react-icons/fi";
 import { supabase } from "@/lib/supabase";
+import PhoneInput from "@/components/PhoneInput";
 
 type LogType = "event" | "walk-in" | "enquiry" | "expense" | "note";
 
@@ -348,12 +349,10 @@ export default function DailyLogPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                  <input
-                    type="tel"
+                  <PhoneInput
+                    label="Phone"
                     value={form.customer_phone}
-                    onChange={(e) => setForm({ ...form, customer_phone: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
+                    onChange={(v) => setForm({ ...form, customer_phone: v })}
                   />
                 </div>
               </div>

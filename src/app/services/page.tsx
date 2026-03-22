@@ -8,7 +8,7 @@ import { cloudinaryUrl } from "@/lib/cloudinary";
 export const metadata: Metadata = {
   title: "Services | Prashanthi Digital Studio",
   description:
-    "Professional photography, videography & LED wall rental services for weddings, birthdays, corporate events in Hyderabad.",
+    "Professional photography, videography, drone shooting, Jimmy Jib & LED wall rental services for weddings, birthdays, corporate events in Hyderabad.",
 };
 
 const photographyServices = [
@@ -86,6 +86,44 @@ const videographyServices = [
   },
 ];
 
+const droneServices = [
+  {
+    title: "Aerial Wedding Coverage",
+    desc: "Breathtaking aerial shots of wedding venues, processions & outdoor ceremonies from above.",
+  },
+  {
+    title: "Venue & Location Flyovers",
+    desc: "Stunning bird's-eye view videos of event venues, function halls & outdoor locations.",
+  },
+  {
+    title: "Pre-Wedding Drone Shoot",
+    desc: "Dramatic aerial footage for pre-wedding films — capturing vast landscapes & scenic backdrops.",
+  },
+  {
+    title: "Corporate & Real Estate Aerial",
+    desc: "Professional aerial photography & videography for corporate events, properties & campuses.",
+  },
+];
+
+const jimmyJibServices = [
+  {
+    title: "Wedding Crane Shots",
+    desc: "Smooth, sweeping crane shots of wedding ceremonies, baraat & reception — adding a cinematic feel.",
+  },
+  {
+    title: "Stage Event Coverage",
+    desc: "Professional Jimmy Jib coverage for stage events, cultural programs & award ceremonies.",
+  },
+  {
+    title: "Reception & Sangeet",
+    desc: "Dynamic elevated shots during reception, sangeet dance performances & celebrations.",
+  },
+  {
+    title: "Corporate & Conference",
+    desc: "High-angle coverage for corporate events, conferences & large gatherings with smooth movement.",
+  },
+];
+
 export default function ServicesPage() {
   return (
     <>
@@ -100,7 +138,7 @@ export default function ServicesPage() {
           </h1>
           <p className="text-gray-300 max-w-2xl mx-auto">
             From capturing precious moments to creating spectacular visual experiences —
-            we offer a complete range of photography, videography & LED wall services.
+            we offer a complete range of photography, videography, drone, Jimmy Jib & LED wall services.
           </p>
         </div>
       </section>
@@ -174,6 +212,64 @@ export default function ServicesPage() {
       </section>
       </FadeInOnScroll>
 
+      {/* Drone Services */}
+      <FadeInOnScroll>
+      <section className="py-16 md:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-accent mb-2">
+              🚁 Drone Shooting Services
+            </h2>
+            <p className="text-gray-500">
+              Stunning aerial photography & videography
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-6">
+            {droneServices.map((service) => (
+              <div
+                key={service.title}
+                className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm hover:shadow-md transition"
+              >
+                <h3 className="font-bold text-accent text-base mb-2">
+                  {service.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{service.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      </FadeInOnScroll>
+
+      {/* Jimmy Jib Services */}
+      <FadeInOnScroll>
+      <section className="py-16 md:py-24 bg-light-bg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-accent mb-2">
+              🎥 Jimmy Jib Services
+            </h2>
+            <p className="text-gray-500">
+              Professional crane shots for a cinematic experience
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-6">
+            {jimmyJibServices.map((service) => (
+              <div
+                key={service.title}
+                className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm hover:shadow-md transition"
+              >
+                <h3 className="font-bold text-accent text-base mb-2">
+                  {service.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{service.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      </FadeInOnScroll>
+
       {/* LED Wall CTA */}
       <section className="py-16 md:py-24 bg-accent text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
@@ -201,7 +297,7 @@ export default function ServicesPage() {
             Need a Custom Package?
           </h2>
           <p className="text-white/80 mb-6">
-            We offer flexible combo packages — Photography + Videography + LED Wall.
+            We offer flexible combo packages — Photography + Videography + Drone + Jimmy Jib + LED Wall.
             Contact us for a personalized quote!
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

@@ -2,7 +2,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FiCamera, FiFilm, FiMonitor, FiStar, FiArrowRight, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiCamera, FiFilm, FiMonitor, FiStar, FiArrowRight, FiChevronLeft, FiChevronRight, FiSend } from "react-icons/fi";
+import { GiDeliveryDrone } from "react-icons/gi";
+import { MdOutlineCameraOutdoor } from "react-icons/md";
 import FadeInOnScroll from "@/components/FadeInOnScroll";
 import { cloudinaryUrl, siteImages } from "@/lib/cloudinary";
 import { homePageEventTypes } from "@/lib/eventCategories";
@@ -27,34 +29,27 @@ const services = [
     desc: "Premium 8ft x 12ft Jona LED screens for weddings, corporate events & stage backdrops.",
     href: "/led-walls",
   },
+  {
+    icon: GiDeliveryDrone,
+    title: "Drone Shooting",
+    desc: "Aerial photography & videography for stunning bird's-eye views of weddings, venues & outdoor events.",
+    href: "/services",
+  },
+  {
+    icon: MdOutlineCameraOutdoor,
+    title: "Jimmy Jib",
+    desc: "Smooth, cinematic crane shots for weddings, receptions & stage events using professional Jimmy Jib.",
+    href: "/services",
+  },
 ];
 
-const testimonials = [
-  {
-    name: "Rajesh & Priya",
-    event: "Wedding Photography",
-    rating: 5,
-    text: "Absolutely amazing work! Every moment of our wedding was captured beautifully. Highly recommend Prashanthi Studio!",
-  },
-  {
-    name: "Suresh Kumar",
-    event: "Corporate Event",
-    rating: 5,
-    text: "Professional service and excellent quality. The LED wall setup was perfect for our corporate conference.",
-  },
-  {
-    name: "Lakshmi Devi",
-    event: "Birthday Party",
-    rating: 5,
-    text: "My son\u2019s first birthday photos came out wonderfully. The team was so patient and creative!",
-  },
-  {
-    name: "Anand & Meena",
-    event: "Pre-Wedding Shoot",
-    rating: 5,
-    text: "Our pre-wedding shoot was like a dream! The locations they suggested were perfect.",
-  },
-];
+interface Testimonial {
+  id: string;
+  client_name: string;
+  event_type: string;
+  rating: number;
+  review: string;
+}
 
 const heroWords = ["Precious Moments", "Wedding Stories", "Celebrations", "Beautiful Memories"];
 
@@ -95,6 +90,13 @@ export default function HomePage() {
   const typedText = useTypewriter(heroWords, 80, 2500);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [recentPhotos, setRecentPhotos] = useState<{id: string; url: string; title: string}[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+
+  // Review form state
+  const [reviewForm, setReviewForm] = useState({ client_name: "", event_type: "", rating: 5, review: "" });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [reviewError, setReviewError] = useState("");
 
   useEffect(() => {
     async function loadRecent() {
@@ -103,21 +105,54 @@ export default function HomePage() {
         if (data) setRecentPhotos(data);
       } catch {}
     }
+    async function loadTestimonials() {
+      try {
+        const { data } = await supabase.from("testimonials").select("id, client_name, event_type, rating, review").eq("is_visible", true).order("created_at", { ascending: false });
+        if (data) setTestimonials(data);
+      } catch {}
+    }
     loadRecent();
+    loadTestimonials();
   }, []);
 
   const nextTestimonial = useCallback(() => {
-    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
-  }, []);
+    setCurrentTestimonial((prev) => testimonials.length > 0 ? (prev + 1) % testimonials.length : 0);
+  }, [testimonials.length]);
 
   const prevTestimonial = useCallback(() => {
-    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  }, []);
+    setCurrentTestimonial((prev) => testimonials.length > 0 ? (prev - 1 + testimonials.length) % testimonials.length : 0);
+  }, [testimonials.length]);
 
   useEffect(() => {
+    if (testimonials.length === 0) return;
     const timer = setInterval(nextTestimonial, 5000);
     return () => clearInterval(timer);
-  }, [nextTestimonial]);
+  }, [nextTestimonial, testimonials.length]);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReviewError("");
+    if (!reviewForm.client_name.trim() || !reviewForm.review.trim()) {
+      setReviewError("Please fill in your name and review.");
+      return;
+    }
+    setReviewSubmitting(true);
+    try {
+      const { error } = await supabase.from("testimonials").insert({
+        client_name: reviewForm.client_name.trim(),
+        event_type: reviewForm.event_type.trim() || "General",
+        rating: reviewForm.rating,
+        review: reviewForm.review.trim(),
+        is_visible: false,
+      });
+      if (error) throw error;
+      setReviewSubmitted(true);
+      setReviewForm({ client_name: "", event_type: "", rating: 5, review: "" });
+    } catch {
+      setReviewError("Failed to submit. Please try again.");
+    }
+    setReviewSubmitting(false);
+  };
 
   return (
     <>
@@ -195,7 +230,7 @@ export default function HomePage() {
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1a1a2e]">Our Services</h2>
             </div>
           </FadeInOnScroll>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-8">
             {services.map((service, idx) => {
               const Icon = service.icon;
               return (
@@ -303,64 +338,127 @@ export default function HomePage() {
             </div>
           </FadeInOnScroll>
 
+          {testimonials.length === 0 && (
+            <div className="text-center py-10 text-gray-400 text-sm">
+              <p>Customer reviews will appear here.</p>
+            </div>
+          )}
+
           {/* Desktop grid */}
-          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {testimonials.map((t, idx) => (
-              <FadeInOnScroll key={t.name} delay={idx * 150}>
-                <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm hover:shadow-md transition h-full">
-                  <div className="flex gap-1 mb-3">
-                    {Array.from({ length: t.rating }).map((_, i) => (
-                      <FiStar key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    ))}
+          {testimonials.length > 0 && (
+            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {testimonials.slice(0, 8).map((t, idx) => (
+                <FadeInOnScroll key={t.id} delay={idx * 150}>
+                  <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm hover:shadow-md transition h-full">
+                    <div className="flex gap-1 mb-3">
+                      {Array.from({ length: t.rating }).map((_, i) => (
+                        <FiStar key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                      ))}
+                    </div>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-4">&ldquo;{t.review}&rdquo;</p>
+                    <div>
+                      <p className="font-semibold text-[#1a1a2e] text-sm">{t.client_name}</p>
+                      <p className="text-xs text-gray-400">{t.event_type}</p>
+                    </div>
                   </div>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
-                  <div>
-                    <p className="font-semibold text-[#1a1a2e] text-sm">{t.name}</p>
-                    <p className="text-xs text-gray-400">{t.event}</p>
-                  </div>
-                </div>
-              </FadeInOnScroll>
-            ))}
-          </div>
+                </FadeInOnScroll>
+              ))}
+            </div>
+          )}
 
           {/* Mobile carousel */}
-          <div className="sm:hidden">
-            <div className="relative">
-              <div className="overflow-hidden rounded-xl">
-                <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentTestimonial * 100}%)` }}>
-                  {testimonials.map((t) => (
-                    <div key={t.name} className="min-w-full px-1">
-                      <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-                        <div className="flex gap-1 mb-3">
-                          {Array.from({ length: t.rating }).map((_, i) => (
-                            <FiStar key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                          ))}
-                        </div>
-                        <p className="text-gray-600 text-sm leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
-                        <div>
-                          <p className="font-semibold text-[#1a1a2e] text-sm">{t.name}</p>
-                          <p className="text-xs text-gray-400">{t.event}</p>
+          {testimonials.length > 0 && (
+            <div className="sm:hidden">
+              <div className="relative">
+                <div className="overflow-hidden rounded-xl">
+                  <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentTestimonial * 100}%)` }}>
+                    {testimonials.map((t) => (
+                      <div key={t.id} className="min-w-full px-1">
+                        <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                          <div className="flex gap-1 mb-3">
+                            {Array.from({ length: t.rating }).map((_, i) => (
+                              <FiStar key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                            ))}
+                          </div>
+                          <p className="text-gray-600 text-sm leading-relaxed mb-4">&ldquo;{t.review}&rdquo;</p>
+                          <div>
+                            <p className="font-semibold text-[#1a1a2e] text-sm">{t.client_name}</p>
+                            <p className="text-xs text-gray-400">{t.event_type}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-center gap-4 mt-4">
-                <button onClick={prevTestimonial} className="p-2 rounded-full bg-gray-100 hover:bg-primary hover:text-white transition" aria-label="Previous testimonial">
-                  <FiChevronLeft className="w-5 h-5" />
-                </button>
-                <div className="flex gap-2">
-                  {testimonials.map((_, idx) => (
-                    <button key={idx} onClick={() => setCurrentTestimonial(idx)} className={`w-2.5 h-2.5 rounded-full transition-all ${idx === currentTestimonial ? "bg-primary w-6" : "bg-gray-300"}`} aria-label={`Go to testimonial ${idx + 1}`} />
-                  ))}
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <button onClick={prevTestimonial} className="p-2 rounded-full bg-gray-100 hover:bg-primary hover:text-white transition" aria-label="Previous testimonial">
+                    <FiChevronLeft className="w-5 h-5" />
+                  </button>
+                  <div className="flex gap-2">
+                    {testimonials.map((_, idx) => (
+                      <button key={idx} onClick={() => setCurrentTestimonial(idx)} className={`w-2.5 h-2.5 rounded-full transition-all ${idx === currentTestimonial ? "bg-primary w-6" : "bg-gray-300"}`} aria-label={`Go to testimonial ${idx + 1}`} />
+                    ))}
+                  </div>
+                  <button onClick={nextTestimonial} className="p-2 rounded-full bg-gray-100 hover:bg-primary hover:text-white transition" aria-label="Next testimonial">
+                    <FiChevronRight className="w-5 h-5" />
+                  </button>
                 </div>
-                <button onClick={nextTestimonial} className="p-2 rounded-full bg-gray-100 hover:bg-primary hover:text-white transition" aria-label="Next testimonial">
-                  <FiChevronRight className="w-5 h-5" />
-                </button>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Review Submission Form */}
+          <FadeInOnScroll>
+            <div className="mt-16 max-w-2xl mx-auto">
+              <div className="text-center mb-6">
+                <h3 className="text-xl md:text-2xl font-bold text-[#1a1a2e] mb-2">Share Your Experience</h3>
+                <p className="text-gray-500 text-sm">Had a great experience with us? We&apos;d love to hear from you!</p>
+              </div>
+              {reviewSubmitted ? (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
+                  <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FiStar className="w-6 h-6 text-white" />
+                  </div>
+                  <h4 className="font-bold text-green-800 mb-1">Thank You!</h4>
+                  <p className="text-green-600 text-sm">Your review has been submitted and will appear on our website after approval.</p>
+                  <button onClick={() => setReviewSubmitted(false)} className="mt-4 text-sm text-primary font-semibold hover:underline">Submit Another Review</button>
+                </div>
+              ) : (
+                <form onSubmit={handleReviewSubmit} className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm space-y-4">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Your Name *</label>
+                      <input type="text" required value={reviewForm.client_name} onChange={(e) => setReviewForm({ ...reviewForm, client_name: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="e.g., Rajesh & Priya" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+                      <input type="text" value={reviewForm.event_type} onChange={(e) => setReviewForm({ ...reviewForm, event_type: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="e.g., Wedding Photography" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} type="button" onClick={() => setReviewForm({ ...reviewForm, rating: star })} className="focus:outline-none">
+                          <FiStar className={`w-7 h-7 transition ${star <= reviewForm.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Your Review *</label>
+                    <textarea rows={3} required value={reviewForm.review} onChange={(e) => setReviewForm({ ...reviewForm, review: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-none" placeholder="Tell us about your experience..." />
+                  </div>
+                  {reviewError && <p className="text-red-500 text-sm">{reviewError}</p>}
+                  <button type="submit" disabled={reviewSubmitting} className="w-full bg-primary text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-primary-dark transition disabled:opacity-50">
+                    <FiSend className="w-4 h-4" />
+                    {reviewSubmitting ? "Submitting..." : "Submit Review"}
+                  </button>
+                  <p className="text-xs text-gray-400 text-center">Your review will be visible after admin approval.</p>
+                </form>
+              )}
+            </div>
+          </FadeInOnScroll>
         </div>
       </section>
 
